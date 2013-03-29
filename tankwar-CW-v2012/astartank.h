@@ -18,6 +18,17 @@ private:
 	  float targetX, targetY;
 	  float enemyX, enemyY;
 	  float baseX, baseY;
+
+	  //Extra variables
+	  bool rotDir; // true = clockwise
+
+
+	  bool avoid( );
+	  bool attackEnemy( );
+	  bool attackBuilding();
+	  void travel();
+
+
    public:
       AStarTank(); // Construtor
       ~AStarTank(); // Destructor

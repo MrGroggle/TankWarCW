@@ -7,6 +7,7 @@ AStarTank::AStarTank() // Construtor
 	numberOfShells = 15;
 	stop();
 	stopTurret();
+	rotDir = 0;
 }
 
 AStarTank::~AStarTank(){} // Destructor
@@ -42,6 +43,11 @@ void AStarTank::move() //  AI
 	 stopTurret();
 	 */
 	// You must leave in the line below or nothing will happen
+	if( !avoid() )
+		if( !attackEnemy() )
+			if( !attackBuilding() )
+				travel();
+
 	implementMove(); // Do the move
 }
 
@@ -72,7 +78,60 @@ void AStarTank::fire() // You shouldn't need to touch this, can alter the sense 
 	}
 }
 
+bool AStarTank::avoid( ){
+
+	return false;
+}
+
+bool AStarTank::attackEnemy(){
+
+	if( enemySpotted == true )
+	{
+		if( canFire() ) fire();
+		enemySpotted = false;
+		return true;
+	} else return false;
+}
+
+bool AStarTank::attackBuilding(){
+	if( baseSpotted == true )
+	{
+		if( canFire() ) fire();
+		baseSpotted = false;
+
+		return true;
+	} else return false;
+
+	return false;
+}
+
+void AStarTank::travel(){
+
+	if( obstructed == true )
+	{
+		goBackward();
+		pos.set( pos.getX() , pos.getY() , pos.getTh() + 90 );
+
+		//int rotAngle = rand() % 180 - 360;
+		//if( rotAngle < 0 ){ goLeft(); turretGoLeft(); }
+		//else
+		//if( rotAngle >= 0 ){ goRight(); turretGoRight(); }
 
 
+		//pos.set( pos.getX() , pos.getY() , pos.getTh() + 45 );
+		//turretTh += 45;
+
+		obstructed = false;
+	} else
+	goForward();
+	
+	
+	// turret rotation
+	if( ( turretTh > pos.getTh() + 90 ) && rotDir ) rotDir = false;
+	else
+	if( ( turretTh <  pos.getTh() - 90 ) && !rotDir ) rotDir = true;
+	if( rotDir ) turretGoRight(); else turretGoLeft();
+	
+}
 
 
