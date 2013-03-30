@@ -8,26 +8,10 @@ AStarTank::AStarTank() // Construtor
 	stop();
 	stopTurret();
 	rotDir = 0;
+	rotateDir = 0;
 }
 
 AStarTank::~AStarTank(){} // Destructor
-
-void AStarTank::reset(float newX, float newY, float newTh, float newTurretTh)
-{
-	// Init conditions
-	obstructed = false; // Tank has hit an obstacle/building/tank
-	targetSpotted = false; // Spotted an enemy building
-	enemySpotted = false; // Spotted the enemy
-	baseSpotted = false; // Spotted the home base
-	enemyBaseHit = false; // Enemy base hit
-	enemyHit = false; // Enemy hit
-
-	pos.set(newX,newY,newTh);  // Move to assigned position
-	turretTh = newTurretTh;
-
-	fireCounter = 0; // Reset fire counter
-	updateBb();
-}
 
 void AStarTank::move() //  AI
 {
@@ -43,47 +27,16 @@ void AStarTank::move() //  AI
 	 stopTurret();
 	 */
 	// You must leave in the line below or nothing will happen
-	if( !avoid() )
-		if( !attackEnemy() )
-			if( !attackBuilding() )
-				travel();
+	travel();
 
 	implementMove(); // Do the move
 }
 
-bool AStarTank::isFiring()
-{
-	return false;
-	// Return true when firing a shell
-}
-
-void AStarTank::fire() // You shouldn't need to touch this, can alter the sense reset if you wish
-{
-	// Firing - called by game object when IsFiring returns true
-	if(canFire())
-	{
-	  // Decrement ammo
-	  numberOfShells--;
-	  // Set firecounter
-	  fireCounter = 12;
-	  // Reset to senses
-	  enemySpotted = false;
-	  targetSpotted = false;
-	}
-	else
-	{
-	  // Reset the senses
-	  enemySpotted = false;
-	  targetSpotted = false;
-	}
-}
-
-bool AStarTank::avoid( ){
-
+bool AStarTank::avoid( Shell& ){
 	return false;
 }
 
-bool AStarTank::attackEnemy(){
+bool AStarTank::attackEnemy( Tank& ){
 
 	if( enemySpotted == true )
 	{
@@ -107,11 +60,32 @@ bool AStarTank::attackBuilding(){
 
 void AStarTank::travel(){
 
+	if( edgeSpotted == true )
+	{
+		if(rotateDir == 0 )
+			rotateDir = rand() % 1 + 2;
+
+		if( ( pos.getTh()/360 > 0.125 && pos.getTh()/360 <= 0.250 ) ||
+			( pos.getTh()/360 > 0.375 && pos.getTh()/360 <= 0.500 ) || 
+			( pos.getTh()/360 > 0.625 && pos.getTh()/360 <= 0.750 ) ||
+			( pos.getTh()/360 < 0.875 && pos.getTh()/360 <= 0.999 ) )
+		//if(rotateDir == 1 )
+			goLeft();
+		else goRight();
+
+		edgeSpotted = false;
+	} else {
+		rotateDir = 0;
+	}
+	
+
+
+
 	if( obstructed == true )
 	{
 		goBackward();
 		pos.set( pos.getX() , pos.getY() , pos.getTh() + 90 );
-
+		//turretTh += 90;
 		//int rotAngle = rand() % 180 - 360;
 		//if( rotAngle < 0 ){ goLeft(); turretGoLeft(); }
 		//else
@@ -119,19 +93,19 @@ void AStarTank::travel(){
 
 
 		//pos.set( pos.getX() , pos.getY() , pos.getTh() + 45 );
-		//turretTh += 45;
+		
 
 		obstructed = false;
+
 	} else
 	goForward();
 	
 	
 	// turret rotation
-	if( ( turretTh > pos.getTh() + 90 ) && rotDir ) rotDir = false;
+	if( ( turretTh > pos.getTh() + 45 ) && rotDir ) rotDir = false;
 	else
-	if( ( turretTh <  pos.getTh() - 90 ) && !rotDir ) rotDir = true;
+	if( ( turretTh <  pos.getTh() - 45 ) && !rotDir ) rotDir = true;
 	if( rotDir ) turretGoRight(); else turretGoLeft();
 	
+
 }
-
-
